@@ -1,0 +1,40 @@
+{
+  "name": "affixio-demos",
+  "version": "1.0.0",
+  "description": "Agentic payments for AI agents and autonomous systems. Offline-first, proof-based payments, ZK proofs, POS demo. api.affix-io.com",
+  "keywords": [
+    "agentic-payments",
+    "ai-agents",
+    "autonomous-payments",
+    "offline-payments",
+    "zero-knowledge",
+    "zkp",
+    "proof-based-payments",
+    "affixio",
+    "pos",
+    "agentic-ai"
+  ],
+  "author": "AffixIO",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/affixio/demo"
+  },
+  "homepage": "https://api.affix-io.com/docs",
+  "files": [
+    "index.html",
+    "shared/affix-api.js",
+    "agentic-payments/",
+    "proof-flow/",
+    "circuits/",
+    "eligibility/",
+    "tokens/",
+    "health/"
+  ],
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js",
+    "preview": "npx serve . -p 3000"
+  },
+  "engines": {}
+}

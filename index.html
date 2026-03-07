@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AffixIO Demo — Agentic Payments for AI Agents & Autonomous Systems</title>
+  <meta name="description" content="Agentic payments demo: AI agents, autonomous payments, offline-first, proof-based. Zero-knowledge proofs for POS and terminals. API: api.affix-io.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b0f;
+      --surface: #12141c;
+      --border: #1e2230;
+      --text: #e8eaef;
+      --muted: #6b7280;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.15);
+      --ok: #10b981;
+      --err: #ef4444;
+      --radius: 12px;
+      --font: 'Outfit', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+    h1 { font-size: clamp(28px, 5vw, 38px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .lead { font-size: 18px; color: var(--muted); margin-bottom: 40px; max-width: 640px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; text-decoration: none; color: inherit; display: block; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-dim); }
+    .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .card p { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+    .card .tag { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 6px; background: var(--accent-dim); color: var(--accent); }
+    .card.hero { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, var(--surface) 50%); border-color: rgba(245,158,11,0.35); }
+    .card.hero h2 { font-size: 22px; }
+    .card.hero .tag { background: rgba(245,158,11,0.25); }
+    .api-bar { margin-top: 48px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+    .api-bar code { font-family: var(--mono); background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px; }
+    .api-bar a { color: var(--accent); }
+    footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+    footer a { color: var(--accent); }
+    .file-warn { display: none; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); border-radius: var(--radius); padding: 14px 20px; margin-bottom: 24px; font-size: 14px; }
+    .file-warn.show { display: block; }
+    .file-warn code { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="file-warn" class="file-warn" role="alert">
+      <strong>Opened as a file.</strong> Run <code>node server.js</code> in this folder, then open <code>http://localhost:3000</code>. API: https://api.affix-io.com
+    </div>
+    <h1>AffixIO Demo</h1>
+    <p class="lead"><strong>Agentic payments</strong> for AI agents, autonomous systems, and offline-first terminals. All demos call <strong>https://api.affix-io.com</strong>.</p>
+
+    <div class="grid">
+      <a href="agentic-payments/" class="card hero">
+        <span class="tag">Agentic Payments</span>
+        <h2>AI agents & autonomous payments</h2>
+        <p>Proof-based payments for AI agents and POS. Offline-capable, double-spend prevention, sub-90-byte ZK proofs. Try the full flow: demo key → generate proof → submit as payment.</p>
+      </a>
+      <a href="proof-flow/" class="card">
+        <h2>Proof Generate & Verify</h2>
+        <p>Create a ZK proof with userId and rules, then verify it. Core flow for eligibility and attestation.</p>
+      </a>
+      <a href="circuits/" class="card">
+        <h2>Sandbox Circuits</h2>
+        <p>Run simple-yesno, yesno, eligibility, KYC, token-validation and more — no API key needed.</p>
+      </a>
+      <a href="eligibility/" class="card">
+        <h2>Eligibility Check</h2>
+        <p>Call the eligibility API with a demo key. Stateless yes/no decisions.</p>
+      </a>
+      <a href="tokens/" class="card">
+        <h2>Tokens (Generate / Validate)</h2>
+        <p>Generate and validate tokens. QR and NFC payload endpoints.</p>
+      </a>
+      <a href="health/" class="card">
+        <h2>Health & API Status</h2>
+        <p>Check API health and connectivity. No auth required.</p>
+      </a>
+    </div>
+
+    <div class="api-bar">
+      <strong>API base:</strong> <code>https://api.affix-io.com</code> &nbsp;|&nbsp;
+      <a href="https://api.affix-io.com/docs" target="_blank" rel="noopener">Docs</a> &nbsp;|&nbsp;
+      Demo key: <code>POST /api/demo-key</code> (rate-limited, safe for public demos)
+    </div>
+
+    <footer>
+      Clone from GitHub, run <code>node server.js</code>, then open <a href="http://localhost:3000">http://localhost:3000</a>. All API calls go to <a href="https://api.affix-io.com/docs" target="_blank" rel="noopener">https://api.affix-io.com</a>.
+    </footer>
+  </div>
+  <script>
+    if (window.location.protocol === 'file:') document.getElementById('file-warn').classList.add('show');
+  </script>
+</body>
+</html>

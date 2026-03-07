@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandbox Circuits — AffixIO Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0a0b0f; --surface: #12141c; --border: #1e2230; --text: #e8eaef; --muted: #6b7280; --accent: #f59e0b; --ok: #10b981; --err: #ef4444; --radius: 12px; --font: 'Outfit', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+    a { color: var(--accent); }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select { padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 13px; margin-bottom: 12px; }
+    select { width: 100%; cursor: pointer; }
+    input { width: 100%; }
+    button { padding: 10px 20px; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; background: var(--accent); color: #0a0b0f; border: none; border-radius: 8px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .out { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 8px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow-y: auto; }
+    .out.ok { border-left: 3px solid var(--ok); }
+    .out.err { border-left: 3px solid var(--err); }
+    .nav { margin-bottom: 20px; font-size: 14px; }
+    .badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ok); margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="nav"><a href="../">← Demos</a></p>
+    <h1>Sandbox Circuits</h1>
+    <p class="sub">Run circuits without an API key. Public sandbox endpoints.</p>
+
+    <div class="panel">
+      <h2>Circuit <span class="badge">No auth</span></h2>
+      <label>Circuit</label>
+      <select id="circuit">
+        <option value="simple-yesno">simple-yesno</option>
+        <option value="yesno">yesno</option>
+        <option value="eligibility">eligibility</option>
+      </select>
+      <label>User ID</label>
+      <input id="userId" value="sandbox_user_1">
+      <label>Rules (comma-separated)</label>
+      <input id="rules" value="age_18_plus, resident_uk">
+      <button id="btn-run">Run circuit</button>
+      <div id="out" class="out" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const BASE = 'https://api.affix-io.com';
+
+    function show(el, text, isErr) {
+      el.style.display = 'block';
+      el.textContent = text;
+      el.className = 'out ' + (isErr ? 'err' : 'ok');
+    }
+
+    document.getElementById('btn-run').onclick = async function () {
+      const out = document.getElementById('out');
+      const circuit = document.getElementById('circuit').value;
+      const userId = document.getElementById('userId').value.trim() || 'sandbox_user_1';
+      const rulesStr = document.getElementById('rules').value.trim() || 'age_18_plus';
+      const rules = rulesStr.split(',').map(r => r.trim()).filter(Boolean);
+      const body = { userId, rules };
+      if (circuit === 'eligibility') body.data = {};
+      this.disabled = true;
+      show(out, 'Calling ' + circuit + '…', false);
+      try {
+        const res = await fetch(BASE + '/api/sandbox/circuits/' + circuit, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          show(out, (data.error || data.message || res.statusText) || 'Request failed', true);
+          this.disabled = false;
+          return;
+        }
+        show(out, JSON.stringify(data, null, 2), false);
+      } catch (e) {
+        show(out, 'Error: ' + e.message, true);
+      }
+      this.disabled = false;
+    };
+  </script>
+</body>
+</html>

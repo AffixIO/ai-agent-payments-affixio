@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proof Generate & Verify — AffixIO Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0a0b0f; --surface: #12141c; --border: #1e2230; --text: #e8eaef; --muted: #6b7280; --accent: #f59e0b; --ok: #10b981; --err: #ef4444; --radius: 12px; --font: 'Outfit', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 40px 24px 80px; }
+    a { color: var(--accent); }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 13px; margin-bottom: 12px; }
+    button { padding: 10px 20px; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; background: var(--accent); color: #0a0b0f; border: none; border-radius: 8px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .out { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 8px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto; }
+    .out.ok { border-left: 3px solid var(--ok); }
+    .out.err { border-left: 3px solid var(--err); }
+    .nav { margin-bottom: 20px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="nav"><a href="../">← Demos</a></p>
+    <h1>Proof Generate & Verify</h1>
+    <p class="sub">Create a ZK proof with userId and rules, then verify it. Uses a demo API key.</p>
+
+    <div class="panel">
+      <h2>1. Get demo key</h2>
+      <button id="btn-key">Get demo key</button>
+      <div id="key-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>2. Generate proof</h2>
+      <label>User ID</label>
+      <input id="userId" value="user_001">
+      <label>Rules (comma-separated)</label>
+      <input id="rules" value="age_18_plus, resident_uk">
+      <button id="btn-gen">Generate</button>
+      <div id="gen-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>3. Verify proof</h2>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Uses the proof and publicInputs from step 2.</p>
+      <button id="btn-verify">Verify last proof</button>
+      <div id="verify-out" class="out" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="../shared/affix-api.js"></script>
+  <script>
+    let demoKey = null;
+    let lastProof = null, lastPublicInputs = null;
+
+    function show(el, text, isErr) {
+      el.style.display = 'block';
+      el.textContent = text;
+      el.className = 'out ' + (isErr ? 'err' : 'ok');
+    }
+    function log(el, obj) { show(el, JSON.stringify(obj, null, 2), !!obj.error); }
+
+    document.getElementById('btn-key').onclick = async function () {
+      const out = document.getElementById('key-out');
+      this.disabled = true;
+      try {
+        demoKey = await AffixAPI.getDemoKey();
+        show(out, 'Demo key received.', false);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-gen').onclick = async function () {
+      if (!demoKey) { alert('Get demo key first.'); return; }
+      const out = document.getElementById('gen-out');
+      const userId = document.getElementById('userId').value.trim() || 'user_001';
+      const rules = (document.getElementById('rules').value.trim() || 'age_18_plus').split(',').map(r => r.trim()).filter(Boolean);
+      this.disabled = true;
+      try {
+        const res = await AffixAPI.post('/api/proof/generate', { userId, rules, data: { authorized: true, amountValid: 1 }, transactionAmount: 1 }, demoKey);
+        lastProof = res.proof;
+        lastPublicInputs = res.publicInputs || {};
+        log(out, res);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-verify').onclick = async function () {
+      if (!demoKey || !lastProof) { alert('Generate a proof first.'); return; }
+      const out = document.getElementById('verify-out');
+      this.disabled = true;
+      try {
+        const res = await AffixAPI.post('/api/proof/verify', { proof: lastProof, publicInputs: lastPublicInputs }, demoKey);
+        log(out, res);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tokens — AffixIO Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0a0b0f; --surface: #12141c; --border: #1e2230; --text: #e8eaef; --muted: #6b7280; --accent: #f59e0b; --ok: #10b981; --err: #ef4444; --radius: 12px; --font: 'Outfit', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 40px 24px 80px; }
+    a { color: var(--accent); }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 13px; margin-bottom: 12px; }
+    button { padding: 10px 20px; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; background: var(--accent); color: #0a0b0f; border: none; border-radius: 8px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .out { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 8px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto; }
+    .out.ok { border-left: 3px solid var(--ok); }
+    .out.err { border-left: 3px solid var(--err); }
+    .nav { margin-bottom: 20px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="nav"><a href="../">← Demos</a></p>
+    <h1>Tokens</h1>
+    <p class="sub">Generate and validate tokens. Uses demo API key.</p>
+
+    <div class="panel">
+      <h2>Get demo key</h2>
+      <button id="btn-key">Get demo key</button>
+      <div id="key-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Generate token</h2>
+      <label>Decision (eligible?)</label>
+      <select id="decision">
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+      <label>Expiration (seconds from now, e.g. 3600 = 1 hour)</label>
+      <input id="expiration" type="number" value="3600" min="1">
+      <label>Format</label>
+      <select id="format">
+        <option value="qr">qr</option>
+        <option value="nfc">nfc</option>
+        <option value="jwt">jwt</option>
+        <option value="mobile-pass">mobile-pass</option>
+        <option value="digital-key">digital-key</option>
+      </select>
+      <button id="btn-gen">Generate token</button>
+      <div id="gen-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Validate token</h2>
+      <label>Token (from generate response)</label>
+      <input id="token" placeholder="Paste token or tokenId">
+      <label>Format (optional)</label>
+      <select id="validateFormat">
+        <option value="">—</option>
+        <option value="qr">qr</option>
+        <option value="nfc">nfc</option>
+        <option value="jwt">jwt</option>
+      </select>
+      <button id="btn-validate">Validate</button>
+      <div id="validate-out" class="out" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="../shared/affix-api.js"></script>
+  <script>
+    let demoKey = null;
+
+    function show(el, text, isErr) {
+      el.style.display = 'block';
+      el.textContent = text;
+      el.className = 'out ' + (isErr ? 'err' : 'ok');
+    }
+    function log(el, obj) { show(el, JSON.stringify(obj, null, 2), !!obj.error); }
+
+    document.getElementById('btn-key').onclick = async function () {
+      const out = document.getElementById('key-out');
+      this.disabled = true;
+      try {
+        demoKey = await AffixAPI.getDemoKey();
+        show(out, 'Demo key received.', false);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-gen').onclick = async function () {
+      if (!demoKey) { alert('Get demo key first.'); return; }
+      const out = document.getElementById('gen-out');
+      const decision = document.getElementById('decision').value === 'true';
+      const expiration = parseInt(document.getElementById('expiration').value, 10) || 3600;
+      const format = document.getElementById('format').value;
+      this.disabled = true;
+      try {
+        const res = await AffixAPI.post('/api/tokens/generate', {
+          decision,
+          expiration,
+          format,
+        }, demoKey);
+        if (res.tokenId) document.getElementById('token').value = res.token || res.tokenId || '';
+        log(out, res);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-validate').onclick = async function () {
+      if (!demoKey) { alert('Get demo key first.'); return; }
+      const out = document.getElementById('validate-out');
+      const token = document.getElementById('token').value.trim();
+      const format = document.getElementById('validateFormat').value || undefined;
+      if (!token) { show(out, 'Enter a token to validate.', true); return; }
+      this.disabled = true;
+      try {
+        const body = { token };
+        if (format) body.format = format;
+        const res = await AffixAPI.post('/api/tokens/validate', body, demoKey);
+        log(out, res);
+      } catch (e) { show(out, 'Error: ' + e.message, true); }
+      this.disabled = false;
+    };
+  </script>
+</body>
+</html>

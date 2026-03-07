@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Payments — AI Agents & Autonomous Payments Demo</title>
+  <meta name="description" content="Agentic payments for AI agents and autonomous systems. Offline-first, proof-based, ZK proofs. Generate proof, submit as POS. api.affix-io.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0a0b0f; --surface: #12141c; --border: #1e2230; --text: #e8eaef; --muted: #6b7280; --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.15); --ok: #10b981; --err: #ef4444; --radius: 12px; --font: 'Outfit', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+    a { color: var(--accent); }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+    .panel h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    input { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 14px; margin-bottom: 16px; }
+    input:focus { outline: none; border-color: var(--accent); }
+    button {
+      padding: 12px 24px; font-size: 14px; font-weight: 600; font-family: var(--font); cursor: pointer;
+      background: var(--accent); color: #0a0b0f; border: none; border-radius: 8px; transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); margin-left: 8px; }
+    .out { margin-top: 16px; padding: 16px; background: var(--bg); border-radius: 8px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 320px; overflow-y: auto; }
+    .out.ok { border-left: 3px solid var(--ok); }
+    .out.err { border-left: 3px solid var(--err); }
+    .step { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 8px; }
+    .nav { margin-bottom: 24px; font-size: 14px; }
+    .file-warn { display: none; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 20px; font-size: 13px; }
+    .file-warn.show { display: block; }
+    .file-warn code { background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
+    .dev-section { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .dev-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .dev-section .intro { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+    .dev-section .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .dev-section .tabs button { padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: var(--font); background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+    .dev-section .tabs button:hover { color: var(--text); }
+    .dev-section .tabs button.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+    .dev-section .code-block { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+    .dev-section .code-block.show { display: block; }
+    .dev-section .code-block pre { margin: 0; padding: 16px; font-family: var(--mono); font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+    .dev-section .code-block .label { padding: 8px 14px; background: rgba(0,0,0,0.2); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .dev-section .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+    .dev-section .links a { display: inline-flex; align-items: center; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text); text-decoration: none; }
+    .dev-section .links a:hover { border-color: var(--accent); color: var(--accent); }
+    .dev-section ul { margin: 0 0 16px 20px; padding: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .dev-section ul li { margin-bottom: 4px; }
+    .dev-section .subhead { font-size: 13px; font-weight: 600; color: var(--text); margin: 16px 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="file-warn" class="file-warn" role="alert">Run <code>node server.js</code> in the demo folder and open <code>http://localhost:3000</code>. API: https://api.affix-io.com.</div>
+    <p class="nav"><a href="../">← Demos</a></p>
+    <h1>Agentic Payments</h1>
+    <p class="sub">Generate a payment proof and submit it as a POS transaction. This is the flow used by AI agents and offline terminals.</p>
+
+    <div class="panel">
+      <span class="step">Step 1</span>
+      <h2>Get a demo API key</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Rate-limited (3 req/min per IP). Safe for public demos.</p>
+      <button id="btn-key">Get demo key</button>
+      <div id="key-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <span class="step">Step 2</span>
+      <h2>Generate a proof</h2>
+      <label>User ID</label>
+      <input id="userId" value="agent_demo_1" placeholder="e.g. agent_demo_1">
+      <label>Rules (one per line or comma-separated)</label>
+      <input id="rules" value="payment_authorized, amount_valid" placeholder="payment_authorized, amount_valid">
+      <button id="btn-gen">Generate proof</button>
+      <div id="gen-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <span class="step">Step 3</span>
+      <h2>Submit proof as POS payment</h2>
+      <label>Transaction ID</label>
+      <input id="txId" value="" placeholder="e.g. txn_abc123">
+      <label>Amount</label>
+      <input id="amount" type="number" step="0.01" value="19.99" placeholder="19.99">
+      <label>Currency (optional)</label>
+      <input id="currency" value="GBP" placeholder="GBP">
+      <button id="btn-pos">Submit as payment</button>
+      <div id="pos-out" class="out" style="display:none;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>One-click: Full flow</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Get key → generate proof → submit to POS. Uses demo key (rate limited).</p>
+      <button id="btn-full">Run full agentic payment flow</button>
+      <div id="full-out" class="out" style="display:none;"></div>
+      <p style="margin-top: 16px;">
+        <button type="button" id="btn-show-build" class="btn-secondary">Show how to build this into your app →</button>
+      </p>
+    </div>
+
+    <section class="panel dev-section" id="build-section">
+      <h2>Build this into your app</h2>
+      <p class="intro">Real endpoints and code you can copy. No placeholders — these work against <code>https://api.affix-io.com</code>.</p>
+
+      <ul>
+        <li><strong>1.</strong> Get an API key: sign up at <a href="https://api.affix-io.com/docs" target="_blank" rel="noopener">api.affix-io.com/docs</a> or use <code>POST /api/demo-key</code> for testing (3 req/min per IP).</li>
+        <li><strong>2.</strong> Generate a proof with <code>POST /api/proof/generate</code> (userId, rules, data.authorized, transactionAmount).</li>
+        <li><strong>3.</strong> Submit to POS with <code>POST /api/pos/submit-proof</code> (proof, publicInputs, transactionId, amount, currency).</li>
+        <li><strong>Production:</strong> Use the <a href="https://www.npmjs.com/package/@affix-io/affixiomerchant" target="_blank" rel="noopener">affixiomerchant</a> SDK for offline-first agentic payments (Node, browser, Deno).</li>
+      </ul>
+
+      <div class="tabs" role="tablist">
+        <button type="button" class="active" data-tab="curl" aria-selected="true">cURL</button>
+        <button type="button" data-tab="js">JavaScript (fetch)</button>
+        <button type="button" data-tab="node">Node.js</button>
+      </div>
+
+      <div id="code-curl" class="code-block show">
+        <div class="label">Terminal — replace YOUR_KEY with key from POST /api/demo-key</div>
+        <pre># 1) Get demo key
+curl -s -X POST https://api.affix-io.com/api/demo-key -H "Content-Type: application/json" -d '{}'
+
+# 2) Generate proof (use .key from step 1)
+curl -s -X POST https://api.affix-io.com/api/proof/generate \
+  -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_KEY" \
+  -d '{"userId":"agent_1","rules":["payment_authorized","amount_valid"],"data":{"authorized":true,"amountValid":1},"transactionAmount":19.99}'
+
+# 3) Submit as payment (paste .proof and .publicInputs from step 2)
+curl -s -X POST https://api.affix-io.com/api/pos/submit-proof \
+  -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_KEY" \
+  -d '{"proof":"<from step 2>","publicInputs":{"decision":1,"verified":true,"timestamp":"...","constraints":["payment_authorized"],"amount":19.99},"transactionId":"txn_001","amount":19.99,"currency":"GBP"}'</pre>
+      </div>
+
+      <div id="code-js" class="code-block">
+        <div class="label">Browser (same origin or CORS-allowed)</div>
+        <pre>const API = 'https://api.affix-io.com';
+
+async function runAgenticPayment() {
+  const { key } = await fetch(API + '/api/demo-key', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
+  const gen = await fetch(API + '/api/proof/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      userId: 'agent_1',
+      rules: ['payment_authorized', 'amount_valid'],
+      data: { authorized: true, amountValid: 1 },
+      transactionAmount: 19.99
+    })
+  }).then(r => r.json());
+  const pos = await fetch(API + '/api/pos/submit-proof', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      proof: gen.proof,
+      publicInputs: gen.publicInputs,
+      transactionId: 'txn_' + Date.now(),
+      amount: 19.99,
+      currency: 'GBP'
+    })
+  }).then(r => r.json());
+  return pos; // { success: true, transaction: { ... } }
+}</pre>
+      </div>
+
+      <div id="code-node" class="code-block">
+        <div class="label">Node.js 18+ (or use affixiomerchant for offline payments)</div>
+        <pre>const API = 'https://api.affix-io.com';
+
+async function runAgenticPayment() {
+  const keyRes = await fetch(API + '/api/demo-key', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  const { key } = await keyRes.json();
+  const gen = await fetch(API + '/api/proof/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      userId: 'agent_1',
+      rules: ['payment_authorized', 'amount_valid'],
+      data: { authorized: true, amountValid: 1 },
+      transactionAmount: 19.99
+    })
+  }).then(r => r.json());
+  const pos = await fetch(API + '/api/pos/submit-proof', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      proof: gen.proof,
+      publicInputs: gen.publicInputs,
+      transactionId: 'txn_' + Date.now(),
+      amount: 19.99,
+      currency: 'GBP'
+    })
+  }).then(r => r.json());
+  return pos;
+}
+
+// Production: npm install affixiomerchant — offline proofs, double-spend prevention, queue sync</pre>
+      </div>
+
+      <p class="subhead">Real response shapes</p>
+      <ul>
+        <li><code>POST /api/demo-key</code> → <code>{ "key": "affix_...", "keyPrefix": "affix_...", "warning": "...", "rateLimit": { "perIP": 3, "windowSeconds": 60 } }</code></li>
+        <li><code>POST /api/proof/generate</code> → <code>{ "proofId", "proof", "publicInputs", "timestamp", "sector", "proofSize" }</code></li>
+        <li><code>POST /api/pos/submit-proof</code> → <code>{ "success": true, "transaction": { "id", "transactionId", "amount", "currency", "status", "proofStatus", "createdAt" } }</code> or <code>{ "success": false, "error", "recorded" }</code></li>
+      </ul>
+
+      <div class="links">
+        <a href="https://api.affix-io.com/docs" target="_blank" rel="noopener">Full API docs</a>
+        <a href="https://www.npmjs.com/package/affixiomerchant" target="_blank" rel="noopener">npm: affixiomerchant</a>
+        <a href="https://api.affix-io.com/api/health" target="_blank" rel="noopener">Health check</a>
+      </div>
+    </section>
+  </div>
+
+  <script src="../shared/affix-api.js"></script>
+  <script>
+    if (window.location.protocol === 'file:') document.getElementById('file-warn').classList.add('show');
+    const BASE = AffixAPI.BASE;
+    let demoKey = null;
+
+    function show(el, text, isErr) {
+      el.style.display = 'block';
+      el.textContent = text;
+      el.className = 'out ' + (isErr ? 'err' : 'ok');
+    }
+
+    function log(el, obj) { show(el, JSON.stringify(obj, null, 2), !!obj.error); }
+
+    document.getElementById('btn-key').onclick = async function () {
+      const out = document.getElementById('key-out');
+      this.disabled = true;
+      try {
+        const key = await AffixAPI.getDemoKey();
+        demoKey = key;
+        show(out, 'Demo key received (prefix: ' + key.substring(0, 12) + '…). Use it for Generate and Submit steps.', false);
+      } catch (e) {
+        show(out, 'Error: ' + e.message, true);
+      }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-gen').onclick = async function () {
+      if (!demoKey) { alert('Get a demo key first (Step 1).'); return; }
+      const out = document.getElementById('gen-out');
+      const userId = document.getElementById('userId').value.trim() || 'agent_demo_1';
+      const rulesStr = document.getElementById('rules').value.trim() || 'payment_authorized';
+      const rules = rulesStr.split(/[\n,]+/).map((r) => r.trim()).filter(Boolean);
+      if (!rules.length) rules.push('payment_authorized');
+      const amount = parseFloat(document.getElementById('amount').value) || 19.99;
+      this.disabled = true;
+      try {
+        const res = await AffixAPI.post('/api/proof/generate', { userId, rules, data: { authorized: true, amountValid: 1 }, transactionAmount: amount }, demoKey);
+        window._lastProof = res.proof;
+        window._lastPublicInputs = res.publicInputs || {};
+        document.getElementById('txId').value = 'txn_' + Math.random().toString(36).slice(2, 12);
+        log(out, res);
+      } catch (e) {
+        show(out, 'Error: ' + e.message, true);
+      }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-pos').onclick = async function () {
+      if (!demoKey) { alert('Get a demo key first (Step 1).'); return; }
+      const proof = window._lastProof;
+      const publicInputs = window._lastPublicInputs;
+      if (!proof || !publicInputs) { alert('Generate a proof first (Step 2).'); return; }
+      const out = document.getElementById('pos-out');
+      const transactionId = document.getElementById('txId').value.trim() || 'txn_' + Date.now();
+      const amount = parseFloat(document.getElementById('amount').value) || 19.99;
+      const currency = (document.getElementById('currency').value || 'GBP').slice(0, 3).toUpperCase();
+      this.disabled = true;
+      try {
+        const res = await AffixAPI.post('/api/pos/submit-proof', {
+          proof,
+          publicInputs,
+          transactionId,
+          amount,
+          currency,
+        }, demoKey);
+        log(out, res);
+      } catch (e) {
+        show(out, 'Error: ' + e.message, true);
+      }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-full').onclick = async function () {
+      const out = document.getElementById('full-out');
+      show(out, 'Getting demo key…', false);
+      this.disabled = true;
+      try {
+        const key = await AffixAPI.getDemoKey();
+        demoKey = key;
+        show(out, 'Key received. Generating proof…', false);
+        const gen = await AffixAPI.post('/api/proof/generate', {
+          userId: 'agent_demo_' + Date.now(),
+          rules: ['payment_authorized', 'amount_valid'],
+          data: { authorized: true, amountValid: 1 },
+          transactionAmount: 12.99,
+        }, key);
+        window._lastProof = gen.proof;
+        window._lastPublicInputs = gen.publicInputs || {};
+        show(out, 'Proof generated. Submitting to POS…', false);
+        const txnId = 'txn_' + Math.random().toString(36).slice(2, 12);
+        const pos = await AffixAPI.post('/api/pos/submit-proof', {
+          proof: gen.proof,
+          publicInputs: gen.publicInputs,
+          transactionId: txnId,
+          amount: 12.99,
+          currency: 'GBP',
+        }, key);
+        log(out, { step1: 'demo key', step2: 'proof generated', step3: pos });
+      } catch (e) {
+        show(out, 'Error: ' + e.message, true);
+      }
+      this.disabled = false;
+    };
+
+    document.getElementById('btn-show-build').onclick = function () {
+      document.getElementById('build-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.querySelectorAll('.dev-section .tabs button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tab = this.getAttribute('data-tab');
+        document.querySelectorAll('.dev-section .tabs button').forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+        document.querySelectorAll('.dev-section .code-block').forEach(function (b) { b.classList.remove('show'); });
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+        var el = document.getElementById('code-' + tab);
+        if (el) el.classList.add('show');
+      });
+    });
+  </script>
+</body>
+</html>
