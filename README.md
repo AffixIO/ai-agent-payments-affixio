@@ -1,4 +1,6 @@
-# AffixIO Agentic Demo — Payments for Autonomous AI Agents
+# AffixIO Agentic Demo -  Payments for Autonomous AI Agents
+
+Demo showing how AI agents perform payments using eligibility verification and cryptographic proofs with the AffixIO API.
 
 **Agentic AI payments** powered by **zero-knowledge proofs** (ZKPs).  
 This demo shows how **autonomous agents**, **multi-agent systems**, and **offline-first** terminals can run secure, verifiable payment flows using the AffixIO API.
